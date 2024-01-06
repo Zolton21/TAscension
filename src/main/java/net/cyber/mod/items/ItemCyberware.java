@@ -85,19 +85,6 @@ public class ItemCyberware extends Item implements ICyberPart {
     }
 
     @Override
-    public void runUpgrade(PlayerEntity player, double health){
-        ModifiableAttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
-        //get attribute modif by id
-        AttributeModifier oldHealthModifier = healthAttribute.getModifier(modifier.getID());
-        //what is our value
-        double addedHealth = health * 2.0D;
-        //replace the modifier on the main attribute
-        healthAttribute.removeModifier(modifier.getID());
-        AttributeModifier healthModifier = new AttributeModifier(modifier.getID(), "HP Drain from Cyberware", addedHealth, AttributeModifier.Operation.ADDITION);
-        healthAttribute.applyPersistentModifier(healthModifier);
-    }
-
-    @Override
     public void runOnTick(PlayerEntity player) {
 
     }
