@@ -5,22 +5,23 @@ import net.cyber.mod.container.slots.UpgradeSlot;
 import net.cyber.mod.helper.CyberPartEnum;
 import net.cyber.mod.helper.Helper;
 import net.cyber.mod.tileentity.TileEntitySurgery;
+import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.util.Constants;
 
 
 public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
     public PlayerEntity entity;
-    public NonNullList<ItemStack> oldstacks = NonNullList.create();
-    public NonNullList<ItemStack> newstacks = NonNullList.create();
     public NonNullList<ItemStack> oldstackslist = NonNullList.create();
     public NonNullList<ItemStack> newstackslist = NonNullList.create();
-
 
 
     protected ContainerSurgery(ContainerType<?> type, int id) {
@@ -89,10 +90,10 @@ public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
             oldstackslist.add(ItemStack.EMPTY);
         }
         //System.out.println("oldstackslist size: " + oldstackslist.size());
-        for (int i = 0; i < 24; i++) {
+        /*for (int i = 0; i < 24; i++) {
             oldstackslist.set(i, this.getSlot(i).getStack().copy());
             //System.out.println("Initialization stack: " + oldstackslist.get(i));
-        }
+        }*/
     }
 
     @Override
@@ -126,6 +127,7 @@ public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
                         }
                     }
                 }
+                saveDataToNBT(newstackslist);
                 oldstackslist.clear();
                 newstackslist.clear();
             }
@@ -133,12 +135,44 @@ public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
         super.onContainerClosed(playerIn);
     }
 
-    public void addToRemoved(ItemStack stack) {
-        oldstacks.add(stack);
+    private void saveDataToNBT(NonNullList<ItemStack> stacklist) {
+        if((entity != null) && (entity.getPersistentData() != null)){
+            CompoundNBT playerData = entity.getPersistentData();
+            CompoundNBT customData = new CompoundNBT();
+            ListNBT stacksNBT = new ListNBT();
+            for (int i = 0; i<stacklist.size(); i++) {
+                if (!stacklist.get(i).isEmpty()) {
+                    CompoundNBT stackTag = new CompoundNBT();
+                    stacklist.get(i).write(stackTag);
+                    stacksNBT.add(stackTag);
+                }
+                else{
+                    CompoundNBT stackTag = new CompoundNBT();
+                    ItemStack.EMPTY.write(stackTag);
+                    stacksNBT.add(stackTag);
+                }
+            }
+            customData.put("SurgeryStacks", stacksNBT);
+            playerData.put("SurgeryData", customData);
+            //System.out.println("StackNBT size: " + stacksNBT.size());
+        }
     }
 
-    public void addToAdded(ItemStack stack){
-        newstacks.add(stack);
+    private void loadDataFromNBT() {
+        System.out.println("loadDataFromNBT called");
+        if((entity != null) && (entity.getPersistentData() != null)){
+            CompoundNBT playerData = entity.getPersistentData();
+            if (playerData.contains("SurgeryData")) {
+                CompoundNBT customData = playerData.getCompound("SurgeryData");
+                ListNBT stacksNBT = customData.getList("SurgeryStacks", Constants.NBT.TAG_COMPOUND);
+                System.out.println("stacksNBT Size: " + stacksNBT.size());
+                for (int i = 0; i < stacksNBT.size(); i++) {
+                    CompoundNBT stackTag = stacksNBT.getCompound(i);
+                    ItemStack stack = ItemStack.read(stackTag);
+                    oldstackslist.set(i, stack);
+                }
+            }
+        }
     }
 
     @Override
