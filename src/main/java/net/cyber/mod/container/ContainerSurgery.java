@@ -37,10 +37,17 @@ public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
         super(CyberContainers.SURGEON.get(), id);
         this.init(inv, tile);
         this.entity = inv.player;
+
+        for (int i = 0; i < 24; i++) {
+            oldstackslist.add(ItemStack.EMPTY);
+        }
+        loadDataFromNBT();
+        //System.out.println("oldstackslist size: " + oldstackslist.size());
+        /*for (int i = 0; i < 24; i++) {
+            oldstackslist.set(i, this.getSlot(i).getStack().copy());
+            //System.out.println("Initialization stack: " + oldstackslist.get(i));
+        }*/
     }
-
-
-
 
 
     public void init(PlayerInventory inv, TileEntitySurgery tile) {
@@ -86,14 +93,6 @@ public class ContainerSurgery extends BEContainer<TileEntitySurgery> {
 
         Helper.addPlayerInvContainer(this, inv, 0, 54);
 
-        for (int i = 0; i < 24; i++) {
-            oldstackslist.add(ItemStack.EMPTY);
-        }
-        //System.out.println("oldstackslist size: " + oldstackslist.size());
-        /*for (int i = 0; i < 24; i++) {
-            oldstackslist.set(i, this.getSlot(i).getStack().copy());
-            //System.out.println("Initialization stack: " + oldstackslist.get(i));
-        }*/
     }
 
     @Override
